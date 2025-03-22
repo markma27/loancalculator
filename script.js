@@ -286,15 +286,16 @@ function generateSchedule(loanAmount, term, payment, rate, frequency, residual =
         if (i === totalPeriods) {
             if (residual > 0) {
                 // Adjust principal to leave exactly the residual amount
-                principal = balance - residual;
+                principal = Math.max(0, balance - residual);
+                finalPayment = principal + interest;
             } else {
                 // No residual - pay off remaining balance
                 principal = balance;
+                finalPayment = principal + interest;
             }
-            finalPayment = principal + interest;
-        } else if (principal > balance) {
-            // For non-final payments, if we would overpay, adjust the principal
-            principal = balance;
+        } else if (principal > balance - residual) {
+            // For non-final payments, ensure we don't go below residual amount
+            principal = Math.max(0, balance - residual);
             finalPayment = principal + interest;
         }
 
@@ -314,7 +315,7 @@ function generateSchedule(loanAmount, term, payment, rate, frequency, residual =
         balance = newBalance;
 
         // If loan is fully paid (and no residual), break the loop
-        if (balance <= 0 && residual === 0) {
+        if (balance <= residual) {
             break;
         }
 
@@ -337,6 +338,24 @@ function generateSchedule(loanAmount, term, payment, rate, frequency, residual =
         } else {
             currentDate.setDate(currentDate.getDate() + (frequency === 'weekly' ? 7 : 14));
         }
+    }
+
+    // Add final payment if there's a residual value
+    if (residual > 0 && balance > 0) {
+        const finalInterest = balance * periodicRate;
+        const finalPrincipal = balance;
+        const finalPayment = finalPrincipal + finalInterest;
+
+        schedule.push({
+            paymentNumber: schedule.length,
+            date: new Date(currentDate),
+            financialYear: getFinancialYear(currentDate, fyEndMonth),
+            openingBalance: balance,
+            principal: finalPrincipal,
+            interest: finalInterest,
+            repayment: finalPayment,
+            closingBalance: 0
+        });
     }
 
     return schedule;
