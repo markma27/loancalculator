@@ -758,8 +758,15 @@ function generateJournalEntries(schedule) {
             }, { repayment: 0, interest: 0 });
 
             if (nextYearPortions.repayment > 0 || nextYearPortions.interest > 0) {
+                // Get the financial year end date
+                // For June financial year end (fyEndMonth = 6), use the later year
+                // For December financial year end (fyEndMonth = 12), use the current year
+                const [startYear, endYear] = row.financialYear.split('-');
+                const fyYear = fyEndMonth === 6 ? parseInt(endYear) + 2000 : parseInt(startYear);
+                const fyEndDate = new Date(fyYear, fyEndMonth - 1, fyEndMonth === 12 ? 31 : 30);
+                
                 entries.push({
-                    date: row.date,
+                    date: fyEndDate,
                     description: 'Reclassification of HP liability and unexpired interest',
                     entries: [
                         { account: 'HP Liability - Non-current', debit: nextYearPortions.repayment, credit: 0 },
@@ -960,14 +967,14 @@ function displayJournalEntries(entries) {
     `;
     
     entries.forEach(entry => {
-        // Add date and description row
+        // Add date and description row with background color
         const descRow = document.createElement('tr');
         descRow.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">${formatDate(entry.date)}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-gray-300">${entry.description}</td>
-            <td class="px-6 py-4"></td>
-            <td class="px-6 py-4"></td>
-            <td class="px-6 py-4"></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-gray-800">${formatDate(entry.date)}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-gray-800">${entry.description}</td>
+            <td class="px-6 py-4 bg-gray-50 dark:bg-gray-800"></td>
+            <td class="px-6 py-4 bg-gray-50 dark:bg-gray-800"></td>
+            <td class="px-6 py-4 bg-gray-50 dark:bg-gray-800"></td>
         `;
         tbody.appendChild(descRow);
         
