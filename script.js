@@ -1251,8 +1251,8 @@ function displayBalanceSheet(balanceSheet) {
         }
 
         const tr = document.createElement('tr');
-        // Add highlight class if it's the last row in the financial year
-        const rowClass = lastRowInFY ? 'bg-blue-50 dark:bg-blue-900/20' : '';
+        // Add highlight class and font-bold if it's the last row in the financial year
+        const rowClass = lastRowInFY ? 'bg-blue-50 dark:bg-blue-900/20 font-bold' : '';
         tr.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 ${rowClass}">${row.monthDisplay}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right ${rowClass}">${Math.abs(row.unexpiredInterestCurrent) < 0.001 ? "-" : `$${formatNumber(row.unexpiredInterestCurrent)}`}</td>
@@ -1289,4 +1289,90 @@ document.getElementById('downloadBalanceSheet').addEventListener('click', () => 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Balance Sheet');
     XLSX.writeFile(wb, 'balance_sheet.xlsx');
+});
+
+// PDF Export Functions
+function exportToPDF(tableId, title) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Get loan details
+    const loanAmount = document.getElementById('loanAmount').value;
+    const loanTerm = document.getElementById('loanTerm').value;
+    const frequency = document.getElementById('repaymentFrequency').value;
+    const interestRate = document.getElementById('interestRate').value;
+    const startDate = document.getElementById('startingDate').value;
+    const repaymentAmount = document.getElementById('repaymentAmount').value;
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.setTextColor(37, 99, 235); // Blue color matching the theme
+    doc.text(title, 14, 15);
+    
+    // Add horizontal line
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.5);
+    doc.line(14, 17, 196, 17);
+    
+    // Add loan details
+    doc.setFontSize(10);
+    doc.setTextColor(60, 60, 60); // Dark gray
+    
+    // Left column
+    doc.text(`Loan Amount: $${loanAmount}`, 14, 25);
+    doc.text(`Loan Term: ${loanTerm} years`, 14, 31);
+    doc.text(`Interest Rate: ${interestRate}%`, 14, 37);
+    
+    // Right column
+    doc.text(`Repayment Frequency: ${frequency.charAt(0).toUpperCase() + frequency.slice(1)}`, 105, 25);
+    doc.text(`Start Date: ${startDate}`, 105, 31);
+    doc.text(`Regular Repayment: $${repaymentAmount}`, 105, 37);
+    
+    // Add another line before the table
+    doc.line(14, 41, 196, 41);
+
+    // Find the parent table element that contains both header and body
+    let tableElement;
+    const bodyElement = document.getElementById(tableId);
+    if (bodyElement) {
+        tableElement = bodyElement.closest('table');
+    }
+    
+    // Export table to PDF
+    doc.autoTable({
+        html: tableElement,
+        startY: 45,
+        theme: 'grid',
+        headStyles: { 
+            fillColor: [37, 99, 235],
+            fontSize: 8,
+            cellPadding: 2,
+            halign: 'center'
+        },
+        styles: { 
+            fontSize: 8,
+            cellPadding: 2
+        },
+        margin: { top: 45, right: 14, left: 14 }
+    });
+    
+    // Save the PDF
+    doc.save(`${title.toLowerCase().replace(/\s+/g, '_')}.pdf`);
+}
+
+// Update event listeners for PDF downloads to use table IDs that will find the full table
+document.getElementById('downloadPDF').addEventListener('click', function() {
+    exportToPDF('scheduleTableBody', 'Loan Amortisation Schedule');
+});
+
+document.getElementById('downloadFYSummaryPDF').addEventListener('click', function() {
+    exportToPDF('fySummaryTableBody', 'Financial Year Summary');
+});
+
+document.getElementById('downloadJournalEntriesPDF').addEventListener('click', function() {
+    exportToPDF('journalEntriesTableBody', 'HP Journal Entries');
+});
+
+document.getElementById('downloadBalanceSheetPDF').addEventListener('click', function() {
+    exportToPDF('balanceSheetTableBody', 'Balance Sheet');
 }); 

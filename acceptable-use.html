@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceptable Use & Disclaimer - Loan Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-['Poppins'] transition-colors duration-200">
+    <div class="min-h-screen flex flex-col">
+        <div class="flex-grow p-4">
+            <!-- Main content container with max-width -->
+            <div class="max-w-6xl mx-auto">
+                <!-- Enhanced header with gradient background -->
+                <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-6 mb-8">
+                    <div class="flex flex-col md:flex-row justify-between items-center">
+                        <div class="flex items-center mb-4 md:mb-0">
+                            <!-- Add an icon -->
+                            <svg class="w-10 h-10 text-white mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <h1 class="text-2xl md:text-3xl font-bold text-white">Acceptable Use & Disclaimer</h1>
+                        </div>
+                        <div class="flex items-center bg-white/10 rounded-lg px-4 py-2">
+                            <span class="mr-3 text-white font-medium">Dark Mode</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <div class="space-y-6 text-gray-700 dark:text-gray-300">
+                        <section>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Acceptable Use</h2>
+                            <p class="mb-4">
+                                This loan calculator is provided as a free tool to help you understand loan amortization schedules 
+                                and related financial calculations. By using this calculator, you agree to:
+                            </p>
+                            <ul class="list-disc pl-6 mb-4 space-y-2">
+                                <li>Use the calculator for personal or business planning purposes only</li>
+                                <li>Not attempt to manipulate, reverse engineer, or modify the calculator</li>
+                                <li>Not use the calculator for any illegal or unauthorized purpose</li>
+                                <li>Not attempt to disrupt or overload the service</li>
+                            </ul>
+                        </section>
+
+                        <section>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Disclaimer</h2>
+                            <p class="mb-4">
+                                While we strive to ensure the accuracy of calculations, please note:
+                            </p>
+                            <ul class="list-disc pl-6 mb-4 space-y-2">
+                                <li>The calculator provides estimates only and should not be considered financial advice</li>
+                                <li>Results may vary from actual loan terms offered by financial institutions</li>
+                                <li>We recommend verifying all calculations with a qualified financial professional</li>
+                                <li>The calculator does not take into account all possible fees, charges, or specific loan conditions</li>
+                                <li>We are not responsible for any decisions made based on the calculator's outputs</li>
+                            </ul>
+                        </section>
+
+                        <section>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Financial Advice</h2>
+                            <p class="mb-4">
+                                This calculator is for educational and informational purposes only. It does not constitute financial 
+                                advice. We strongly recommend consulting with qualified financial professionals for advice specific 
+                                to your situation before making any financial decisions.
+                            </p>
+                        </section>
+
+                        <section>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Accuracy of Information</h2>
+                            <p class="mb-4">
+                                While we make every effort to ensure the accuracy of calculations:
+                            </p>
+                            <ul class="list-disc pl-6 mb-4 space-y-2">
+                                <li>All calculations are based on the information you provide</li>
+                                <li>The accuracy of results depends on the accuracy of your inputs</li>
+                                <li>Actual loan terms and conditions may differ from these calculations</li>
+                                <li>Financial institutions may use different calculation methods</li>
+                            </ul>
+                        </section>
+
+                        <section>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Updates to Terms</h2>
+                            <p class="mb-4">
+                                We reserve the right to modify these terms at any time. Continued use of the calculator 
+                                constitutes acceptance of any changes to these terms.
+                            </p>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-gray-800 shadow w-full">
+            <div class="max-w-6xl mx-auto py-2 px-4">
+                <p class="text-center text-xs text-gray-500 dark:text-gray-400">
+                    <a href="index.html" class="hover:text-gray-700 dark:hover:text-gray-300">Back to Home</a>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Dark mode toggle script -->
+    <script>
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Add event listener for dark mode toggle
+        document.getElementById('darkModeToggle').addEventListener('change', function(e) {
+            if (e.target.checked) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('darkMode', 'false');
+            }
+        });
+
+        // Set initial toggle state
+        document.getElementById('darkModeToggle').checked = localStorage.getItem('darkMode') === 'true';
+    </script>
+</body>
+</html> 
