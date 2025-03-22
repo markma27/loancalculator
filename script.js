@@ -984,10 +984,6 @@ function displayJournalEntries(entries) {
             tbody.appendChild(tr);
         });
         
-        // Add a blank row after each entry for better readability
-        const spacerRow = document.createElement('tr');
-        spacerRow.innerHTML = '<td colspan="5" class="h-4"></td>';
-        tbody.appendChild(spacerRow);
     });
 }
 
