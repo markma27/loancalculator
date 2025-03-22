@@ -48,15 +48,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Loan Amount ($)</label>
-                        <input type="text" id="loanAmount" value="50,000" min="0" pattern="^[0-9,]*$" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter a positive number">
+                        <input type="text" id="loanAmount" value="50,000" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter a positive number">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Loan Term (Years)</label>
                         <input type="number" id="loanTerm" value="5" min="1" max="100" step="1" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter 1-100 years">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Repayment Amount ($)</label>
-                        <input type="text" id="repaymentAmount" min="0" pattern="^[0-9,]*$" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Leave blank to calculate">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Regular Repayment Amount ($)</label>
+                        <input type="text" id="repaymentAmount" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Leave blank to calculate">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Repayment Frequency</label>
@@ -73,7 +73,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Residual Payment ($)</label>
-                        <input type="text" id="residualPayment" min="0" pattern="^[0-9,]*$" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Optional">
+                        <input type="text" id="residualPayment" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Optional">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Starting Date</label>
@@ -98,6 +98,9 @@
                     <button id="generateSchedule" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200">
                         Generate Schedule
                     </button>
+                    <div id="interestOnlyNote" class="hidden mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                        HP Journal and Balance Sheet are not available for interest-only loans
+                    </div>
                 </div>
             </div>
 
@@ -237,6 +240,16 @@
             <!-- Right advertisement space -->
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 shadow mt-8">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-gray-500 dark:text-gray-400">
+                <a href="privacy-policy.html" class="hover:text-gray-700 dark:hover:text-gray-300">Privacy Policy</a>
+            </p>
+        </div>
+    </footer>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="script.js"></script>
 </body>

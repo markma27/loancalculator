@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Loan Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-['Poppins'] transition-colors duration-200">
+    <div class="min-h-screen p-4">
+        <!-- Main content container with max-width -->
+        <div class="max-w-6xl mx-auto">
+            <!-- Enhanced header with gradient background -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-6 mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex items-center mb-4 md:mb-0">
+                        <!-- Add an icon -->
+                        <svg class="w-10 h-10 text-white mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h1 class="text-2xl md:text-3xl font-bold text-white">Privacy Policy</h1>
+                    </div>
+                    <div class="flex items-center bg-white/10 rounded-lg px-4 py-2">
+                        <span class="mr-3 text-white font-medium">Dark Mode</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <div class="space-y-6 text-gray-700 dark:text-gray-300">
+                    <section>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Introduction</h2>
+                        <p class="mb-4">
+                            This Privacy Policy explains how the Loan Calculator handles your information. Our calculator is designed 
+                            to operate entirely within your browser, ensuring maximum privacy and security for your financial calculations.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Information Collection</h2>
+                        <p class="mb-4">
+                            Our loan calculator:
+                        </p>
+                        <ul class="list-disc pl-6 mb-4 space-y-2">
+                            <li>Does not collect or store any personal information</li>
+                            <li>Performs all calculations locally in your browser</li>
+                            <li>Does not transmit your financial data to any servers</li>
+                            <li>Only stores your dark mode preference in your browser's local storage</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Local Storage</h2>
+                        <p class="mb-4">
+                            We use your browser's local storage only to remember your display preferences (dark/light mode). 
+                            This information never leaves your device and is not used for tracking or analytics purposes.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Data Security</h2>
+                        <p class="mb-4">
+                            Since all calculations are performed locally in your browser:
+                        </p>
+                        <ul class="list-disc pl-6 mb-4 space-y-2">
+                            <li>Your financial data never leaves your device</li>
+                            <li>No information is stored on external servers</li>
+                            <li>Your calculations are completely private</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Downloads</h2>
+                        <p class="mb-4">
+                            When you download calculation results (Excel files):
+                        </p>
+                        <ul class="list-disc pl-6 mb-4 space-y-2">
+                            <li>Files are generated locally in your browser</li>
+                            <li>No data is transmitted to external servers</li>
+                            <li>Downloads are saved directly to your device</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Updates to Privacy Policy</h2>
+                        <p class="mb-4">
+                            We may update this Privacy Policy from time to time. Any changes will be reflected on this page.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Contact</h2>
+                        <p class="mb-4">
+                            If you have any questions about this Privacy Policy, please contact us.
+                        </p>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 shadow mt-8">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-gray-500 dark:text-gray-400">
+                <a href="index.html" class="hover:text-gray-700 dark:hover:text-gray-300">Home</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Dark mode toggle script -->
+    <script>
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Add event listener for dark mode toggle
+        document.getElementById('darkModeToggle').addEventListener('change', function(e) {
+            if (e.target.checked) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('darkMode', 'false');
+            }
+        });
+
+        // Set initial toggle state
+        document.getElementById('darkModeToggle').checked = localStorage.getItem('darkMode') === 'true';
+    </script>
+</body>
+</html> 

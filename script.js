@@ -16,11 +16,20 @@ const residualPaymentInput = document.getElementById('residualPayment');
 
 // Function to format number with commas
 function formatInputWithCommas(element) {
-    // Remove any non-digit characters
-    let value = element.value.replace(/[^\d]/g, '');
-    // Format with commas
+    // Remove any non-digit and non-decimal characters
+    let value = element.value.replace(/[^\d.]/g, '');
+    
+    // Ensure only one decimal point
+    const decimalPoints = value.match(/\./g);
+    if (decimalPoints && decimalPoints.length > 1) {
+        value = value.substring(0, value.lastIndexOf('.'));
+    }
+    
+    // Format with commas and maintain decimal places
     if (value) {
-        value = parseInt(value).toLocaleString('en-US');
+        const parts = value.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        value = parts.join('.');
     }
     element.value = value;
 }
@@ -156,7 +165,17 @@ function getFinancialYear(date, fyEndMonth) {
     }
 }
 
-// Update the generateSchedule function to handle yearly payments
+// Add new function to calculate daily rate
+function calculateDailyRate(annualRate) {
+    return Math.pow(1 + annualRate, 1/365) - 1;
+}
+
+// Add new function to calculate interest based on days
+function calculateInterestForPeriod(balance, dailyRate, days) {
+    return balance * dailyRate * days;
+}
+
+// Update the generateSchedule function to use periodic rate
 function generateSchedule(loanAmount, term, payment, rate, frequency, residual = 0, startingDate = new Date(), fyEndMonth = 6, isInterestOnly = false) {
     const periodsPerYear = getPeriodsPerYear(frequency);
     const totalPeriods = term * periodsPerYear;
@@ -342,17 +361,16 @@ function generateSchedule(loanAmount, term, payment, rate, frequency, residual =
 
     // Add final payment if there's a residual value
     if (residual > 0 && balance > 0) {
-        const finalInterest = balance * periodicRate;
         const finalPrincipal = balance;
-        const finalPayment = finalPrincipal + finalInterest;
+        const finalPayment = finalPrincipal;  // No interest for residual payment
 
         schedule.push({
             paymentNumber: schedule.length,
-            date: new Date(currentDate),
+            date: new Date(currentDate),  // Same date as last payment
             financialYear: getFinancialYear(currentDate, fyEndMonth),
             openingBalance: balance,
             principal: finalPrincipal,
-            interest: finalInterest,
+            interest: 0,  // No interest for residual payment
             repayment: finalPayment,
             closingBalance: 0
         });
@@ -420,6 +438,17 @@ function validateInputs() {
             return false;
         }
 
+        // Calculate minimum required payment (without interest)
+        const periodsPerYear = getPeriodsPerYear(frequency);
+        const totalPeriods = term * periodsPerYear;
+        const residualAmount = residualPayment ? parseFloat(residualPayment.replace(/,/g, '')) : 0;
+        const minPayment = (loanAmount - residualAmount) / totalPeriods;
+
+        if (payment < minPayment) {
+            alert(`Repayment amount of $${formatNumber(payment)} is too low to pay off the loan within ${term} years.\nMinimum repayment required: $${formatNumber(minPayment)} (excluding interest)`);
+            return false;
+        }
+
         // If both payment and interest rate are provided, validate that payment covers interest
         if (interestRateInput !== '' && interestRateInput.toLowerCase() !== 'unknown') {
             const rate = parseFloat(interestRateInput) / 100;
@@ -460,40 +489,101 @@ function validateInputs() {
     return true;
 }
 
-// Add input event listeners for formatting
+// Update loan amount input handler
 document.getElementById('loanAmount').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/[^0-9.]/g, '');
-    if (value !== '') {
-        value = parseFloat(value).toLocaleString('en-US', {
-            maximumFractionDigits: 2,
-            useGrouping: true
-        });
+    // Get the current cursor position
+    const cursorPosition = e.target.selectionStart;
+    
+    // Get the current value and remove all commas
+    let value = e.target.value.replace(/,/g, '');
+    
+    // Only allow numbers and one decimal point
+    value = value.replace(/[^\d.]/g, '');
+    
+    // Ensure only one decimal point
+    const decimalCount = (value.match(/\./g) || []).length;
+    if (decimalCount > 1) {
+        value = value.replace(/\./g, (match, index) => index === value.indexOf('.') ? '.' : '');
     }
+    
+    // Format with commas for thousands
+    if (value) {
+        const parts = value.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        value = parts.join('.');
+    }
+    
     e.target.value = value;
+    
+    // Restore cursor position
+    const newCursorPosition = cursorPosition + (value.length - e.target.value.length);
+    e.target.setSelectionRange(newCursorPosition, newCursorPosition);
 });
 
 document.getElementById('repaymentAmount').addEventListener('input', function(e) {
-    if (e.target.value.toLowerCase() !== 'unknown') {
-        let value = e.target.value.replace(/[^0-9.]/g, '');
-        if (value !== '') {
-            value = parseFloat(value).toLocaleString('en-US', {
-                maximumFractionDigits: 2,
-                useGrouping: true
-            });
-        }
-        e.target.value = value;
+    // If the value is 'unknown', leave it as is
+    if (e.target.value.toLowerCase() === 'unknown') {
+        return;
     }
+
+    // Get the current cursor position
+    const cursorPosition = e.target.selectionStart;
+    
+    // Get the current value and remove all commas
+    let value = e.target.value.replace(/,/g, '');
+    
+    // Only allow numbers and one decimal point
+    value = value.replace(/[^\d.]/g, '');
+    
+    // Ensure only one decimal point
+    const decimalCount = (value.match(/\./g) || []).length;
+    if (decimalCount > 1) {
+        value = value.replace(/\./g, (match, index) => index === value.indexOf('.') ? '.' : '');
+    }
+    
+    // Format with commas for thousands
+    if (value) {
+        const parts = value.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        value = parts.join('.');
+    }
+    
+    e.target.value = value;
+    
+    // Restore cursor position
+    const newCursorPosition = cursorPosition + (value.length - e.target.value.length);
+    e.target.setSelectionRange(newCursorPosition, newCursorPosition);
 });
 
+// Update residual payment input handler
 document.getElementById('residualPayment').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/[^0-9.]/g, '');
-    if (value !== '') {
-        value = parseFloat(value).toLocaleString('en-US', {
-            maximumFractionDigits: 2,
-            useGrouping: true
-        });
+    // Get the current cursor position
+    const cursorPosition = e.target.selectionStart;
+    
+    // Get the current value and remove all commas
+    let value = e.target.value.replace(/,/g, '');
+    
+    // Only allow numbers and one decimal point
+    value = value.replace(/[^\d.]/g, '');
+    
+    // Ensure only one decimal point
+    const decimalCount = (value.match(/\./g) || []).length;
+    if (decimalCount > 1) {
+        value = value.replace(/\./g, (match, index) => index === value.indexOf('.') ? '.' : '');
     }
+    
+    // Format with commas for thousands
+    if (value) {
+        const parts = value.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        value = parts.join('.');
+    }
+    
     e.target.value = value;
+    
+    // Restore cursor position
+    const newCursorPosition = cursorPosition + (value.length - e.target.value.length);
+    e.target.setSelectionRange(newCursorPosition, newCursorPosition);
 });
 
 document.getElementById('interestRate').addEventListener('input', function(e) {
@@ -757,11 +847,33 @@ function displaySchedule(schedule) {
     // Display financial year summary
     displayFinancialYearSummary(generateFinancialYearSummary(schedule));
     
-    // Display journal entries
-    displayJournalEntries(generateJournalEntries(schedule));
+    // Check if interest-only is selected
+    const isInterestOnly = document.getElementById('interestOnly').value === 'yes';
     
-    // Display balance sheet
-    displayBalanceSheet(generateBalanceSheet(schedule));
+    // Get the journal entries and balance sheet buttons
+    const journalEntriesButton = document.getElementById('showJournalEntries');
+    const balanceSheetButton = document.getElementById('showBalanceSheet');
+    const interestOnlyNote = document.getElementById('interestOnlyNote');
+    
+    // Hide/show the buttons and note based on interest-only selection
+    if (isInterestOnly) {
+        journalEntriesButton.classList.add('hidden');
+        balanceSheetButton.classList.add('hidden');
+        interestOnlyNote.classList.remove('hidden');
+        // If we're currently showing journals or balance sheet, switch to amortisation
+        const currentSection = document.querySelector('#scheduleContainer > div:not(.hidden)');
+        if (currentSection.id === 'journalEntriesSection' || currentSection.id === 'balanceSheetSection') {
+            showSection('amortisation');
+            updateButtonStyles(document.getElementById('showAmortisation'));
+        }
+    } else {
+        journalEntriesButton.classList.remove('hidden');
+        balanceSheetButton.classList.remove('hidden');
+        interestOnlyNote.classList.add('hidden');
+        // Display journal entries and balance sheet
+        displayJournalEntries(generateJournalEntries(schedule));
+        displayBalanceSheet(generateBalanceSheet(schedule));
+    }
     
     // Show amortisation section by default
     showSection('amortisation');
@@ -1119,8 +1231,13 @@ function displayBalanceSheet(balanceSheet) {
     tbody.innerHTML = '';
     
     let currentFY = '';
+    let lastRowInFY = false;
     
-    balanceSheet.forEach(row => {
+    balanceSheet.forEach((row, index) => {
+        // Check if this is the last row in the current financial year
+        lastRowInFY = index === balanceSheet.length - 1 || 
+                      row.financialYear !== balanceSheet[index + 1]?.financialYear;
+        
         // Add financial year separator if it's a new financial year
         if (row.financialYear !== currentFY) {
             currentFY = row.financialYear;
@@ -1134,12 +1251,14 @@ function displayBalanceSheet(balanceSheet) {
         }
 
         const tr = document.createElement('tr');
+        // Add highlight class if it's the last row in the financial year
+        const rowClass = lastRowInFY ? 'bg-blue-50 dark:bg-blue-900/20' : '';
         tr.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">${row.monthDisplay}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right">${Math.abs(row.unexpiredInterestCurrent) < 0.001 ? "-" : `$${formatNumber(row.unexpiredInterestCurrent)}`}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right">${Math.abs(row.unexpiredInterestNonCurrent) < 0.001 ? "-" : `$${formatNumber(row.unexpiredInterestNonCurrent)}`}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right">${Math.abs(row.hpLiabilityCurrent) < 0.001 ? "-" : `$${formatNumber(row.hpLiabilityCurrent)}`}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right">${Math.abs(row.hpLiabilityNonCurrent) < 0.001 ? "-" : `$${formatNumber(row.hpLiabilityNonCurrent)}`}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 ${rowClass}">${row.monthDisplay}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right ${rowClass}">${Math.abs(row.unexpiredInterestCurrent) < 0.001 ? "-" : `$${formatNumber(row.unexpiredInterestCurrent)}`}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right ${rowClass}">${Math.abs(row.unexpiredInterestNonCurrent) < 0.001 ? "-" : `$${formatNumber(row.unexpiredInterestNonCurrent)}`}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right ${rowClass}">${Math.abs(row.hpLiabilityCurrent) < 0.001 ? "-" : `$${formatNumber(row.hpLiabilityCurrent)}`}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right ${rowClass}">${Math.abs(row.hpLiabilityNonCurrent) < 0.001 ? "-" : `$${formatNumber(row.hpLiabilityNonCurrent)}`}</td>
         `;
         tbody.appendChild(tr);
     });
