@@ -682,6 +682,7 @@ function generateFinancialYearSummary(schedule) {
 // Add function to generate journal entries
 function generateJournalEntries(schedule) {
     const entries = [];
+    const frequency = document.getElementById('repaymentFrequency').value;
     
     // Calculate total interest and total repayment
     const totals = schedule.reduce((acc, row) => {
@@ -725,46 +726,48 @@ function generateJournalEntries(schedule) {
         ]
     });
     
-    // Skip payment #0 (initial row) and process each payment
-    for (let i = 1; i < schedule.length; i++) {
-        const row = schedule[i];
+    // For yearly repayments, handle financial year ends separately
+    if (frequency === 'yearly') {
+        // Get all unique financial years from the schedule
+        const financialYears = [...new Set(schedule.map(row => row.financialYear))].sort();
         
-        // Combined interest and payment entry
-        if (row.repayment > 0) {
-            entries.push({
-                date: row.date,
-                description: 'HP payment and interest recognition',
-                entries: [
-                    { account: 'HP Liability - Current', debit: row.repayment, credit: 0 },
-                    { account: 'Interest Expense', debit: row.interest, credit: 0 },
-                    { account: 'Unexpired Interest - Current', debit: 0, credit: row.interest },
-                    { account: 'Bank/Cash', debit: 0, credit: row.repayment }
-                ]
-            });
+        // First, add all payment entries
+        for (let i = 1; i < schedule.length; i++) {
+            const row = schedule[i];
+            if (row.repayment > 0) {
+                entries.push({
+                    date: row.date,
+                    description: 'HP payment and interest recognition',
+                    entries: [
+                        { account: 'HP Liability - Current', debit: row.repayment, credit: 0 },
+                        { account: 'Interest Expense', debit: row.interest, credit: 0 },
+                        { account: 'Unexpired Interest - Current', debit: 0, credit: row.interest },
+                        { account: 'Bank/Cash', debit: 0, credit: row.repayment }
+                    ]
+                });
+            }
         }
 
-        // If this is the last payment of the financial year, add reclassification entry
-        if (i < schedule.length - 1 && 
-            row.financialYear !== schedule[i + 1].financialYear && 
-            schedule[i + 1].financialYear !== '') {
+        // Then, handle reclassification entries for each financial year end
+        for (let i = 0; i < financialYears.length - 1; i++) {
+            const currentFY = financialYears[i];
+            const nextFY = financialYears[i + 1];
             
             // Calculate next year's portions
-            const nextYearPortions = schedule.slice(i + 1).reduce((acc, futureRow) => {
-                if (futureRow.financialYear === schedule[i + 1].financialYear) {
-                    acc.repayment += futureRow.repayment;
-                    acc.interest += futureRow.interest;
+            const nextYearPortions = schedule.reduce((acc, row) => {
+                if (row.financialYear === nextFY && row.paymentNumber > 0) {
+                    acc.repayment += row.repayment;
+                    acc.interest += row.interest;
                 }
                 return acc;
             }, { repayment: 0, interest: 0 });
 
             if (nextYearPortions.repayment > 0 || nextYearPortions.interest > 0) {
                 // Get the financial year end date
-                // For June financial year end (fyEndMonth = 6), use the later year
-                // For December financial year end (fyEndMonth = 12), use the current year
-                const [startYear, endYear] = row.financialYear.split('-');
+                const [startYear, endYear] = currentFY.split('-');
                 const fyYear = fyEndMonth === 6 ? parseInt(endYear) + 2000 : parseInt(startYear);
                 const fyEndDate = new Date(fyYear, fyEndMonth - 1, fyEndMonth === 12 ? 31 : 30);
-                
+
                 entries.push({
                     date: fyEndDate,
                     description: 'Reclassification of HP liability and unexpired interest',
@@ -777,8 +780,62 @@ function generateJournalEntries(schedule) {
                 });
             }
         }
+    } else {
+        // For non-yearly repayments, use the original logic
+        for (let i = 1; i < schedule.length; i++) {
+            const row = schedule[i];
+            
+            // Combined interest and payment entry
+            if (row.repayment > 0) {
+                entries.push({
+                    date: row.date,
+                    description: 'HP payment and interest recognition',
+                    entries: [
+                        { account: 'HP Liability - Current', debit: row.repayment, credit: 0 },
+                        { account: 'Interest Expense', debit: row.interest, credit: 0 },
+                        { account: 'Unexpired Interest - Current', debit: 0, credit: row.interest },
+                        { account: 'Bank/Cash', debit: 0, credit: row.repayment }
+                    ]
+                });
+            }
+
+            // If this is the last payment of the financial year, add reclassification entry
+            if (i < schedule.length - 1 && 
+                row.financialYear !== schedule[i + 1].financialYear && 
+                schedule[i + 1].financialYear !== '') {
+                
+                // Calculate next year's portions
+                const nextYearPortions = schedule.slice(i + 1).reduce((acc, futureRow) => {
+                    if (futureRow.financialYear === schedule[i + 1].financialYear) {
+                        acc.repayment += futureRow.repayment;
+                        acc.interest += futureRow.interest;
+                    }
+                    return acc;
+                }, { repayment: 0, interest: 0 });
+
+                if (nextYearPortions.repayment > 0 || nextYearPortions.interest > 0) {
+                    // Get the financial year end date
+                    const [startYear, endYear] = row.financialYear.split('-');
+                    const fyYear = fyEndMonth === 6 ? parseInt(endYear) + 2000 : parseInt(startYear);
+                    const fyEndDate = new Date(fyYear, fyEndMonth - 1, fyEndMonth === 12 ? 31 : 30);
+                    
+                    entries.push({
+                        date: fyEndDate,
+                        description: 'Reclassification of HP liability and unexpired interest',
+                        entries: [
+                            { account: 'HP Liability - Non-current', debit: nextYearPortions.repayment, credit: 0 },
+                            { account: 'Unexpired Interest - Non-current', debit: 0, credit: nextYearPortions.interest },
+                            { account: 'HP Liability - Current', debit: 0, credit: nextYearPortions.repayment },
+                            { account: 'Unexpired Interest - Current', debit: nextYearPortions.interest, credit: 0 }
+                        ]
+                    });
+                }
+            }
+        }
     }
     
+    // Sort entries by date
+    entries.sort((a, b) => a.date - b.date);
     return entries;
 }
 
@@ -1138,6 +1195,7 @@ function formatExcelSheet(ws, options = {}) {
 function generateBalanceSheet(schedule) {
     const balanceSheet = {};
     const fyEndMonth = parseInt(document.getElementById('fyEndMonth').value);
+    const frequency = document.getElementById('repaymentFrequency').value;
     
     // Initialize balances for each account
     let currentUnexpiredInterest = 0;
@@ -1164,63 +1222,143 @@ function generateBalanceSheet(schedule) {
         }
     });
 
-    // Get all unique months from the schedule
-    const months = schedule.map(row => {
-        const date = new Date(row.date);
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    }).filter((value, index, self) => self.indexOf(value) === index);
-
-    // For each month, calculate closing balances
-    months.forEach(monthKey => {
-        const [year, month] = monthKey.split('-').map(Number);
-        const lastDayOfMonth = new Date(year, month, 0);
-
-        // Get all entries up to this month
-        const monthEntries = generateJournalEntries(schedule).filter(entry => {
-            const entryDate = new Date(entry.date);
-            return entryDate <= lastDayOfMonth;
-        });
-
-        // Reset balances for this month
-        currentUnexpiredInterest = 0;
-        nonCurrentUnexpiredInterest = 0;
-        currentHPLiability = 0;
-        nonCurrentHPLiability = 0;
-
-        // Process all entries up to this month
-        monthEntries.forEach(entry => {
-            entry.entries.forEach(line => {
-                switch(line.account) {
-                    case 'Unexpired Interest - Current':
-                        currentUnexpiredInterest += (line.debit || 0) - (line.credit || 0);
-                        break;
-                    case 'Unexpired Interest - Non-current':
-                        nonCurrentUnexpiredInterest += (line.debit || 0) - (line.credit || 0);
-                        break;
-                    case 'HP Liability - Current':
-                        currentHPLiability += (line.credit || 0) - (line.debit || 0);
-                        break;
-                    case 'HP Liability - Non-current':
-                        nonCurrentHPLiability += (line.credit || 0) - (line.debit || 0);
-                        break;
-                }
-            });
-        });
-
-        // Store balances for this month
-        const date = new Date(year, month - 1);
-        const financialYear = getFinancialYear(date, fyEndMonth);
-        const monthName = date.toLocaleString('default', { month: 'short' });
+    if (frequency === 'yearly') {
+        // For yearly repayments, we need to show both payment dates and financial year ends
+        const allDates = new Set();
         
-        balanceSheet[monthKey] = {
-            financialYear,
-            monthDisplay: `${monthName} ${year}`,
-            unexpiredInterestCurrent: currentUnexpiredInterest,
-            unexpiredInterestNonCurrent: nonCurrentUnexpiredInterest,
-            hpLiabilityCurrent: currentHPLiability,
-            hpLiabilityNonCurrent: nonCurrentHPLiability
-        };
-    });
+        // Add all payment dates
+        schedule.forEach(row => {
+            const date = new Date(row.date);
+            allDates.add(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+        });
+        
+        // Add all financial year end dates between start and end of loan
+        const startDate = new Date(schedule[0].date);
+        const endDate = new Date(schedule[schedule.length - 1].date);
+        let currentDate = new Date(startDate);
+        
+        while (currentDate <= endDate) {
+            // If this is June (financial year end)
+            if (currentDate.getMonth() + 1 === fyEndMonth) {
+                allDates.add(`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`);
+            }
+            // Move to next month
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+
+        // Convert dates to array and sort
+        const months = Array.from(allDates).sort();
+
+        // Process each month
+        months.forEach(monthKey => {
+            const [year, month] = monthKey.split('-').map(Number);
+            const lastDayOfMonth = new Date(year, month, 0);
+
+            // Get all journal entries up to this month
+            const monthEntries = generateJournalEntries(schedule).filter(entry => {
+                const entryDate = new Date(entry.date);
+                return entryDate <= lastDayOfMonth;
+            });
+
+            // Reset balances for this month
+            currentUnexpiredInterest = 0;
+            nonCurrentUnexpiredInterest = 0;
+            currentHPLiability = 0;
+            nonCurrentHPLiability = 0;
+
+            // Process all entries up to this month
+            monthEntries.forEach(entry => {
+                entry.entries.forEach(line => {
+                    switch(line.account) {
+                        case 'Unexpired Interest - Current':
+                            currentUnexpiredInterest += (line.debit || 0) - (line.credit || 0);
+                            break;
+                        case 'Unexpired Interest - Non-current':
+                            nonCurrentUnexpiredInterest += (line.debit || 0) - (line.credit || 0);
+                            break;
+                        case 'HP Liability - Current':
+                            currentHPLiability += (line.credit || 0) - (line.debit || 0);
+                            break;
+                        case 'HP Liability - Non-current':
+                            nonCurrentHPLiability += (line.credit || 0) - (line.debit || 0);
+                            break;
+                    }
+                });
+            });
+
+            // Store balances for this month
+            const date = new Date(year, month - 1);
+            const financialYear = getFinancialYear(date, fyEndMonth);
+            const monthName = date.toLocaleString('default', { month: 'short' });
+            
+            balanceSheet[monthKey] = {
+                financialYear,
+                monthDisplay: `${monthName} ${year}`,
+                unexpiredInterestCurrent: currentUnexpiredInterest,
+                unexpiredInterestNonCurrent: nonCurrentUnexpiredInterest,
+                hpLiabilityCurrent: currentHPLiability,
+                hpLiabilityNonCurrent: nonCurrentHPLiability
+            };
+        });
+    } else {
+        // For non-yearly repayments, use the original logic
+        const months = schedule.map(row => {
+            const date = new Date(row.date);
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        }).filter((value, index, self) => self.indexOf(value) === index);
+
+        // Process each month
+        months.forEach(monthKey => {
+            const [year, month] = monthKey.split('-').map(Number);
+            const lastDayOfMonth = new Date(year, month, 0);
+
+            // Get all entries up to this month
+            const monthEntries = generateJournalEntries(schedule).filter(entry => {
+                const entryDate = new Date(entry.date);
+                return entryDate <= lastDayOfMonth;
+            });
+
+            // Reset balances for this month
+            currentUnexpiredInterest = 0;
+            nonCurrentUnexpiredInterest = 0;
+            currentHPLiability = 0;
+            nonCurrentHPLiability = 0;
+
+            // Process all entries up to this month
+            monthEntries.forEach(entry => {
+                entry.entries.forEach(line => {
+                    switch(line.account) {
+                        case 'Unexpired Interest - Current':
+                            currentUnexpiredInterest += (line.debit || 0) - (line.credit || 0);
+                            break;
+                        case 'Unexpired Interest - Non-current':
+                            nonCurrentUnexpiredInterest += (line.debit || 0) - (line.credit || 0);
+                            break;
+                        case 'HP Liability - Current':
+                            currentHPLiability += (line.credit || 0) - (line.debit || 0);
+                            break;
+                        case 'HP Liability - Non-current':
+                            nonCurrentHPLiability += (line.credit || 0) - (line.debit || 0);
+                            break;
+                    }
+                });
+            });
+
+            // Store balances for this month
+            const date = new Date(year, month - 1);
+            const financialYear = getFinancialYear(date, fyEndMonth);
+            const monthName = date.toLocaleString('default', { month: 'short' });
+            
+            balanceSheet[monthKey] = {
+                financialYear,
+                monthDisplay: `${monthName} ${year}`,
+                unexpiredInterestCurrent: currentUnexpiredInterest,
+                unexpiredInterestNonCurrent: nonCurrentUnexpiredInterest,
+                hpLiabilityCurrent: currentHPLiability,
+                hpLiabilityNonCurrent: nonCurrentHPLiability
+            };
+        });
+    }
 
     return Object.entries(balanceSheet).map(([monthKey, balances]) => ({
         monthKey,
