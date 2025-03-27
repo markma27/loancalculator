@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /public/
+Allow: /privacy-policy.html
+Allow: /acceptable-use.html
+Disallow: /private/
+Disallow: /admin/
+
+Sitemap: https://hpschedule.com/sitemap.xml 
