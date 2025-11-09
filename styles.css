@@ -143,3 +143,57 @@ th, td {
     background-color: transparent !important;
     background: transparent !important;
 }
+
+/* Fix date input field overflow on mobile */
+input[type="date"] {
+    max-width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+/* Ensure grid containers don't overflow on mobile */
+.grid {
+    min-width: 0;
+}
+
+.grid > div {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Mobile-specific fixes for form inputs */
+@media (max-width: 768px) {
+    input[type="date"] {
+        font-size: 16px; /* Prevents zoom on iOS */
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    /* Ensure form container doesn't overflow */
+    .rounded-lg.shadow-lg {
+        overflow-x: hidden;
+    }
+    
+    /* Ensure parent containers don't overflow */
+    .max-w-6xl {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    /* Ensure all inputs fit within their containers */
+    input, select {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Reduce padding on mobile for form container */
+    .p-6 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Ensure grid items don't overflow */
+    .grid > div {
+        overflow: hidden;
+    }
+}
