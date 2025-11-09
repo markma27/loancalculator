@@ -782,6 +782,44 @@ function generateJournalEntries(schedule) {
         }
     } else {
         // For non-yearly repayments, use the original logic
+        // Edge case: if the starting month is the same as the financial year end month,
+        // there may be no payments in the initial financial year. In that case we still
+        // need a year-end reclassification at the end of the initial financial year,
+        // otherwise the following month's payment will drive the "current" balances negative.
+        if (schedule.length > 1 && schedule[0].financialYear !== schedule[1].financialYear) {
+            const nextFY = schedule[1].financialYear;
+            const nextYearPortions = schedule.reduce((acc, row) => {
+                if (row.paymentNumber > 0 && row.financialYear === nextFY) {
+                    acc.repayment += row.repayment;
+                    acc.interest += row.interest;
+                }
+                return acc;
+            }, { repayment: 0, interest: 0 });
+
+            if (nextYearPortions.repayment > 0 || nextYearPortions.interest > 0) {
+                // Determine the calendar year of the financial year end for the initial FY
+                let fyYear;
+                if (fyEndMonth === 6) {
+                    const [startYear, endYear] = schedule[0].financialYear.split('-');
+                    fyYear = parseInt(endYear, 10) + 2000;
+                } else {
+                    fyYear = parseInt(schedule[0].financialYear, 10);
+                }
+                const fyEndDate = new Date(fyYear, fyEndMonth - 1, fyEndMonth === 12 ? 31 : 30);
+
+                entries.push({
+                    date: fyEndDate,
+                    description: 'Reclassification of HP liability and unexpired interest',
+                    entries: [
+                        { account: 'HP Liability - Non-current', debit: nextYearPortions.repayment, credit: 0 },
+                        { account: 'Unexpired Interest - Non-current', debit: 0, credit: nextYearPortions.interest },
+                        { account: 'HP Liability - Current', debit: 0, credit: nextYearPortions.repayment },
+                        { account: 'Unexpired Interest - Current', debit: nextYearPortions.interest, credit: 0 }
+                    ]
+                });
+            }
+        }
+
         for (let i = 1; i < schedule.length; i++) {
             const row = schedule[i];
             
