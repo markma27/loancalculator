@@ -112,3 +112,34 @@ th, td {
     color: #FFFFFF !important;
     fill: #FFFFFF !important;
 }
+
+/* Remove light blue background when like button is clicked */
+[data-lyket-type] button:active,
+[data-lyket-type] button:focus,
+[data-lyket-type] button.clicked,
+[data-lyket-type] button[class*="active"],
+[data-lyket-type] button[class*="clicked"],
+[data-lyket-type] button[class*="selected"],
+[data-lyket-type] [class*="active"] button,
+[data-lyket-type] [class*="clicked"] button {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+/* Remove background from button wrapper when clicked */
+[data-lyket-type] [class*="active"],
+[data-lyket-type] [class*="clicked"],
+[data-lyket-type] [class*="selected"] {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+/* Remove any background color from all button states */
+[data-lyket-type] button,
+[data-lyket-type] button:hover,
+[data-lyket-type] button:active,
+[data-lyket-type] button:focus,
+[data-lyket-type] button:visited {
+    background-color: transparent !important;
+    background: transparent !important;
+}
