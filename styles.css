@@ -62,4 +62,53 @@ th, td {
 .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-} 
+}
+
+/* Lyket widget dark mode styles */
+.dark [data-lyket-type],
+.dark [data-lyket-type] *,
+.dark [data-lyket-type] button,
+.dark [data-lyket-type] span,
+.dark [data-lyket-type] div {
+    color: #D1D5DB !important; /* light gray text */
+}
+
+.dark [data-lyket-type] button {
+    color: #D1D5DB !important;
+    border-color: #6B7280 !important;
+}
+
+.dark [data-lyket-type] span[class*="counter"],
+.dark [data-lyket-type] span[class*="count"],
+.dark [data-lyket-type] span:not([class*="icon"]) {
+    color: #D1D5DB !important;
+}
+
+/* Make thumb up icon white in dark mode */
+.dark [data-lyket-type] svg,
+.dark [data-lyket-type] svg *,
+.dark [data-lyket-type] svg path,
+.dark [data-lyket-type] svg circle,
+.dark [data-lyket-type] svg rect,
+.dark [data-lyket-type] svg polygon {
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+    color: #FFFFFF !important;
+}
+
+.dark [data-lyket-type] button svg,
+.dark [data-lyket-type] button svg *,
+.dark [data-lyket-type] button svg path {
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+    color: #FFFFFF !important;
+}
+
+/* Also target icon elements */
+.dark [data-lyket-type] [class*="icon"],
+.dark [data-lyket-type] [class*="Icon"],
+.dark [data-lyket-type] i,
+.dark [data-lyket-type] .icon {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+}
